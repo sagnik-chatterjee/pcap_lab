@@ -30,7 +30,7 @@ void Merge(int** primes_p, int* prime_count_p, int received_primes[], int receiv
 void UpdateListSize(int* prime_count_p, int my_rank, unsigned bitmask, int p);
 
 int main(int argc, char* argv[]) {
-   int n, i, j, p, local_n, my_rank;   
+   int n, i, j, p, local_n, my_rank;
    MPI_Comm comm;
 
    MPI_Init(&argc, &argv);
@@ -39,24 +39,24 @@ int main(int argc, char* argv[]) {
    MPI_Comm_rank(comm, &my_rank);
 
    n = strtol(argv[1], NULL, 10);
-   local_n = n/(2*p)+2;
+   local_n = n / (2 * p) + 2;
 
    int* primes_p;
    int* prime_count_p;
 
-   primes_p = malloc(local_n*sizeof(int));
-   prime_count_p = malloc(p*sizeof(int));
+   primes_p = malloc(local_n * sizeof(int));
+   prime_count_p = malloc(p * sizeof(int));
 
    j = 0;
 
-   if(my_rank == 0){
-       primes_p[j] = 2;
-       j++;
+   if (my_rank == 0) {
+      primes_p[j] = 2;
+      j++;
    }
 
-   for (i = 2*my_rank +3; i <= n; i += 2 * p){
-      if (Is_prime(i)){
-         primes_p[j]=i;
+   for (i = 2 * my_rank + 3; i <= n; i += 2 * p) {
+      if (Is_prime(i)) {
+         primes_p[j] = i;
          j++;
       }
    }
@@ -69,18 +69,18 @@ int main(int argc, char* argv[]) {
 
    MPI_Allgather(&j, 1, MPI_INT, prime_count_p, 1, MPI_INT, comm);
 
-   Bcast(&primes_p, my_rank, p, comm, local_n, prime_count_p); 
+   Bcast(&primes_p, my_rank, p, comm, local_n, prime_count_p);
 
 #  ifdef DEBUG
    printf("Proc %d > Max primes = %d\n", my_rank, prime_count_p[my_rank]);
    fflush(stdout);
-#  endif 
+#  endif
 
-   if(my_rank == 0){
+   if (my_rank == 0) {
       printf("Primes less than %d are: ", n);
       Print_list(primes_p, prime_count_p[0], 0);
    }
-	
+
    free(primes_p);
 
    MPI_Finalize();
@@ -144,7 +144,7 @@ void Print_list(int list[], int n, int my_rank) {
 /*-------------------------------------------------------------------
  * Function:  Merge
  * Purpose:   Merge a local list of primes with the primes from the process it's
- *            receiving from using a temporary storage array. 
+ *            receiving from using a temporary storage array.
  * In args:   primes_p:  local list of primes
  *            prime_count_p:  the number of primes in each process
  *            received_primes: list of primes to be received
@@ -152,17 +152,17 @@ void Print_list(int list[], int n, int my_rank) {
  *            temp_p: list of primes for temporary storage for the merge
  *
  */
-void Merge(int** primes_p, int* prime_count_p, int received_primes[], int received_count, int** temp_p){
+void Merge(int** primes_p, int* prime_count_p, int received_primes[], int received_count, int** temp_p) {
    int ai = 0;
    int bi = 0;
    int ci = 0;
 
-    while (ci < received_count + *prime_count_p) {
-      if(ai == *prime_count_p){
+   while (ci < received_count + *prime_count_p) {
+      if (ai == *prime_count_p) {
          (*temp_p)[ci] = received_primes[bi];
          ci++; bi++;
       }
-      else if(bi == received_count){
+      else if (bi == received_count) {
          (*temp_p)[ci] = (*primes_p)[ai];
          ci++; ai++;
       }
@@ -181,8 +181,8 @@ void Merge(int** primes_p, int* prime_count_p, int received_primes[], int receiv
 } /* Merge*/
 
 /* Function:    Bcast
- * Purpose:     Broadcast a merged list of primes from process 0 to all 
-  *             the other processes. 
+ * Purpose:     Broadcast a merged list of primes from process 0 to all
+  *             the other processes.
  *
  * Input args:  primes_p = locak list of primes
  *              my_rank = process's rank
@@ -190,39 +190,39 @@ void Merge(int** primes_p, int* prime_count_p, int received_primes[], int receiv
  *              comm = communicator
  *              local_n = size of local prime list
  *              prime_count_p = list of the number of primes on each process
- * 
+ *
  */
 void Bcast(int** primes_p,  int my_rank, int p, MPI_Comm comm, int local_n, int* prime_count_p) {
-int partner;
-unsigned bitmask = 1;
-int* received_primes;
-int* temp_p;
+   int partner;
+   unsigned bitmask = 1;
+   int* received_primes;
+   int* temp_p;
 
-while (bitmask < p) {
-   partner = my_rank ^ bitmask;
-   if (partner < p) {
-      if (my_rank > partner){
-         MPI_Send(*primes_p, prime_count_p[my_rank], MPI_INT, partner, 0, comm);
-         break;
+   while (bitmask < p) {
+      partner = my_rank ^ bitmask;
+      if (partner < p) {
+         if (my_rank > partner) {
+            MPI_Send(*primes_p, prime_count_p[my_rank], MPI_INT, partner, 0, comm);
+            break;
+         }
+         else {
+            received_primes = malloc(prime_count_p[partner] * sizeof(int));
+            temp_p = malloc((prime_count_p[partner] + prime_count_p[my_rank]) * sizeof(int));
+            MPI_Recv(received_primes, prime_count_p[partner], MPI_INT, partner, 0, comm,
+                     MPI_STATUS_IGNORE);
+            Merge(primes_p, &prime_count_p[my_rank], received_primes, prime_count_p[partner], &temp_p);
+#  ifdef DEBUG
+            printf("Proc %d > After phase %d primes are", my_rank, bitmask - 1);
+            Print_list(*primes_p, prime_count_p[my_rank], my_rank);
+            fflush(stdout);
+#  endif
+         }
+
+         UpdateListSize(prime_count_p, my_rank, bitmask, p);
+
       }
-      else{
-         received_primes = malloc(prime_count_p[partner]*sizeof(int));
-         temp_p = malloc((prime_count_p[partner]+prime_count_p[my_rank])*sizeof(int));
-         MPI_Recv(received_primes, prime_count_p[partner], MPI_INT, partner, 0, comm, 
-               MPI_STATUS_IGNORE); 
-         Merge(primes_p, &prime_count_p[my_rank], received_primes, prime_count_p[partner], &temp_p);
-      #  ifdef DEBUG
-         printf("Proc %d > After phase %d primes are", my_rank, bitmask - 1);
-         Print_list(*primes_p, prime_count_p[my_rank], my_rank);
-         fflush(stdout);
-      #  endif
-      }
 
-      UpdateListSize(prime_count_p, my_rank, bitmask, p);
-
-      }
-
-   bitmask <<= 1;
+      bitmask <<= 1;
 
    }
 
@@ -236,13 +236,13 @@ while (bitmask < p) {
  *              p = number of processes
  *              bitmask
  */
-void UpdateListSize(int* prime_count_p, int my_rank, unsigned bitmask, int p){
+void UpdateListSize(int* prime_count_p, int my_rank, unsigned bitmask, int p) {
    int i, partner;
 
-   for(i=0; i < p; i++){
+   for (i = 0; i < p; i++) {
       partner = i ^ bitmask;
-      if(i < partner && partner < p && i != my_rank){
-         prime_count_p[i] = prime_count_p[i] + prime_count_p[partner]; 
+      if (i < partner && partner < p && i != my_rank) {
+         prime_count_p[i] = prime_count_p[i] + prime_count_p[partner];
       }
-   } 
+   }
 } /*UpdateListSize*/
