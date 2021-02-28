@@ -1,4 +1,3 @@
-
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +15,6 @@ int main (int argc, char *argv []) {
 
 	char *word = argv[1];
 
-	int i;
 	int len = strlen(word);
 
 	if (rank == 0) {
@@ -38,7 +36,7 @@ int main (int argc, char *argv []) {
 
 		printf("The rank :- %d. Received:- %s\n", rank, word);
 
-		for (i = 0; i < len; ++i) {
+		for (int i = 0; i < len; ++i) {
 			char z = *(word + i);
 			if (z >= 'A' && z <= 'Z')
 				*(word + i) += 32;

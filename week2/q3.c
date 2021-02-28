@@ -14,8 +14,7 @@ int main (int argc, char *argv []) {
 
 	int len = atoi(argv[1]);
 	int *arr = (int *)calloc(len, sizeof(int));
-	int i;
-	for (i = 0; i < len; ++i) {
+	for (int i = 0; i < len; ++i) {
 		*(arr + i) = atoi(argv[i+2]);
 	}
 
@@ -23,7 +22,7 @@ int main (int argc, char *argv []) {
 
 	if (rank == 0) {
 		
-		for (i = 1; i < size; ++i) {
+		for (int i = 1; i < size; ++i) {
 			MPI_Ssend(arr + i, sizeof(int), MPI_INT, i, 100 + i, MPI_COMM_WORLD);
 			printf("The rank:- %d. Sent %d to %d.\n", rank, arr[i-1], i);
 		}

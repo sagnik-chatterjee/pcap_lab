@@ -14,10 +14,9 @@ int main (int argc, char *argv []) {
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	int m, n;
-	int numbers[MAX][MAX]; 
+	int m,n;
+    int numbers[MAX][MAX]; 
 	
-	int i, j;
 
 	if (rank == 0) {
 
@@ -25,8 +24,8 @@ int main (int argc, char *argv []) {
 		scanf("%d %d", &n, &m);
 
 		fprintf(stdout, "Enter n * m numbers: \n");
-		for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
 				scanf_s("%d", &numbers[i][j], 1)
 			}
 		}

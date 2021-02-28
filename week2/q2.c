@@ -16,12 +16,11 @@ int main (int argc, char *argv []) {
 
 	int *number = (int *)malloc(SIZE);
 	
-	int i;
 
 	if (rank == 0) {
 
 		*number = rand() % 10 + 1;
-		for (i = 1; i < size; ++i) {
+		for (int i = 1; i < size; ++i) {
 			printf("The rank :- %d. Sent to %d:- %d\n", rank, i, *number);
 			// Send to the process with ID = i
 			MPI_Send(number, SIZE, MPI_INT, i, 100 + i, MPI_COMM_WORLD);
