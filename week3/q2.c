@@ -10,36 +10,69 @@ Use collective communication routines.
 
 #include <mpi.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
-//TODO
 int main(int argc, char **argv)
 {
-    int rank, size, M, N;
-    int send_buffer[4], recv_buffer[4][4];
+
+    int rank, size;
+    float avg = 0;
+    float b[100];
+
+    int i, n, m;
+
+    int arr[100], c[100];
+
     MPI_Init(&argc, &argv);
+
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    printf("Enter the value of M ");
-    scanf("%d", &M);
     if(size != 4)
     {
         printf("This application is meant to be run with 4 MPI processes!!!\n");
         MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     }
 
-    if(rank == 0)
+
+    if (rank == 0)
     {
-        N = size;
-        printf("Enter %d values:-\n ", N);
-        for(int i = 0; i < N; i++)
+        n = size;
+        printf("Enter 'm': \n");
+        scanf("%d\n", &m);
+
+        printf("Enter %d x %d = %d elements: ", n, m, n * m);
+        for (i = 0; i < n * m; ++i)
         {
-            for(int j=0;j<M;j++){
-            	scanf("%d",&send_buffer[i][j]);
-            }
+            scanf("%d\n", &arr[i]);
         }
+
     }
 
+    MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatter(arr, m, MPI_INT, c, m, MPI_INT, 0, MPI_COMM_WORLD);
 
+    for (i = 0; i < m; ++i)
+    {
+        avg += c[i];
+    }
+
+    avg /= m;
+    printf("Process :- %d  gives Average = %.2f\n", rank, avg);
+
+    MPI_Gather(&avg, 1, MPI_FLOAT, b, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0)
+    {
+
+        float tavg = 0;
+        for (i = 0; i < n; i++)
+            tavg += b[i];
+        tavg /= n;
+        printf("Total average = %.2f\n", tavg);
+
+    }
+
+    MPI_Finalize();
 }
