@@ -24,7 +24,7 @@ int main(int argc, char **argv )
     int rank, size;
 
     float avg = 0;
-    char b[100], str1[100], str2[100], c1[100], c2[100], concatted[100];
+    char temp[100], str1[100], str2[100], c1[100], c2[100], concatted[100];
 
     int i, j, m;
 
@@ -32,13 +32,6 @@ int main(int argc, char **argv )
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-
-    if(size != 4)
-    {
-        printf("This application is meant to be run with 4 MPI processes!!!\n");
-        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
-    }
 
     if (rank == 0)
     {
@@ -57,20 +50,21 @@ int main(int argc, char **argv )
 
     int t = 0;
 
-    for (t = 0; t <= 2 * m; t += 2)
+    for (t = 0; t <= (2 * m); t += 2)
     {
         concatted[t] = c1[t / 2];
         concatted[t + 1] = c2[t / 2];
     }
     concatted[2 * m] = '\0';
 
-    MPI_Gather(concatted, 2 * m, MPI_CHAR, b, 2 * m, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Gather(concatted, 2 * m, MPI_CHAR, temp, 2 * m, MPI_CHAR, 0, MPI_COMM_WORLD);
 
     if (rank == 0)
     {
-        b[m * size * 2] = '\0';
-        printf("Concated string is :%s\n", b);
+        temp[m * size * 2] = '\0';
+        printf("Concated string is :%s\n", temp);
     }
 
     MPI_Finalize();
+    return 0;
 }

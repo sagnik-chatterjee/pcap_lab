@@ -29,23 +29,19 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    if(size != 4)
-    {
-        printf("This application is meant to be run with 4 MPI processes!!!\n");
-        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
-    }
-
 
     if (rank == 0)
     {
         n = size;
-        printf("Enter 'm': \n");
-        scanf("%d\n", &m);
+        printf("Enter m : \n");
+        scanf("%d", &m);
 
-        printf("Enter %d x %d = %d elements: ", n, m, n * m);
-        for (i = 0; i < n * m; ++i)
+        printf("Enter %d x %d = %d elements:", n, m, (n * m));
+        getchar();
+
+        for (i = 0; i < (n * m); i++)
         {
-            scanf("%d\n", &arr[i]);
+            scanf("\n %d", &arr[i]);
         }
 
     }
@@ -75,4 +71,5 @@ int main(int argc, char **argv)
     }
 
     MPI_Finalize();
+    return 0;
 }
