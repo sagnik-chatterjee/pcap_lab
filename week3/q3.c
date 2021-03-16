@@ -9,6 +9,7 @@ non-vowels found by each process and print the total number of non-vowels.
 #include <string.h>
 #include <stdlib.h>
 
+
 int main(int argc, char **argv)
 {
 
@@ -24,12 +25,6 @@ int main(int argc, char **argv)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    if(size != 4)
-    {
-        printf("This application is meant to be run with 4 MPI processes!!!\n");
-        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
-    }
 
     if (rank == 0)
     {
@@ -54,16 +49,15 @@ int main(int argc, char **argv)
             count += 1;
     }
 
-    printf("Process %d has  Count = %d\n", rank, count);
-
     MPI_Gather(&count, 1, MPI_INT, b, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
     if (rank == 0)
     {
 
         int tcount = 0;
-        for (i = 0; i < n; i++)
+        for (i = 0; i < n; i++) {
+            printf("The process %d has the number of no-vowels:- %d \n", i, b[i]);
             tcount += b[i];
+        }
         printf("Total non vowels = %d\n", tcount);
 
     }
