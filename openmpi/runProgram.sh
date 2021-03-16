@@ -1,5 +1,5 @@
 #!/bin/bash 
-
+## running mpi programs 
 echo "Ensure that mpi is installed and in path 
 and include mpi.h in your c file."
 # compile the program 
