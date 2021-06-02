@@ -1,0 +1,5 @@
+Write a program in CUDA which performs convulation operation one 
+dimesnional input array N of size width using a mask array M of size mask_width 
+to produce the resultant one dimesnional array P of size width. Find the time taken by the 
+kernel.
+ 
